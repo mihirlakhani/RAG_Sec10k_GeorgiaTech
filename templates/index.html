@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Georgia Tech Fintech Lab</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+          
+          margin: 0;
+          overflow: hidden;
+          
+          
+          align-items: center;
+          min-height: 100vh;
+          position: relative;
+          background: linear-gradient(90deg, #773a98, #8b57da);
+          background-size: 400% 400%;
+          animation: gradientAnimation 10s ease infinite;
+        }
+      
+        @keyframes gradientAnimation {
+          0% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: 0% 50%;
+          }
+        }
+      
+        body::after {
+          content: "";
+          position: absolute;
+          top: 0;
+          right: 0;
+          width: 50%;
+          height: 100%;
+          background: url('{{ url_for("static", filename="10292988.png") }}') center center/cover; /* Image URL and styling */
+          opacity: 1; /* Adjust the opacity of the image overlay */
+          z-index: -1; /* Ensure the image is behind other content */
+        }
+
+        .horizontal-line {
+        position: absolute;
+        
+        left: 0;
+        width: 50%; /* Adjust this value as needed */
+        height: 2px; /* Adjust the height of the line */
+        background-color: black; /* Adjust the color of the line */
+        }       
+      
+        
+        
+      
+        /* Remaining CSS for text animation */
+        /* Add here the existing CSS for text animation */
+      </style>
+</head>
+<body>
+    
+
+    <h2>SEC-10k Filing Downloader</h2><br>
+    <form action="/download" method="post">
+        <label for="ticker">Select Ticker:</label>
+        <select id="ticker" name="ticker">
+            <option value="AAPL">AAPL</option>
+            <option value="GS">GS</option>
+            <option value="MSFT">MSFT</option>
+        </select><br><br>
+        <label for="limit">Enter Limit:</label>
+        <input type="number" id="limit" name="limit" min="1" value="1"><br>
+        <p style="font-style: italic; font-size: 14px; color: white;">*Limit is the latest n filings one wants to download <br>
+        If not specified all available 10-K filings will be downloaded</p><br>
+        <button type="submit" id="downloadBtn">Download</button>
+        <p id="downloadMsg" style="display: none;">Download triggered successfully</p>
+        
+    </form>
+
+    <br>
+    <div class="horizontal-line"></div>
+    
+
+    <h2>Chat-SEC10K Powered by RAG</h2><br>
+    <form id="queryForm">
+        <label for="query">Enter your query:</label>
+        <input type="text" id="query" name="query" required style="width: 40%;"><br><br>
+        <button type="button" onclick="submitQuery()">Search</button>
+    </form>
+    <div id="response" style="display: none;">
+        <h3>RAG Response:</h3>
+        <p id="responseText" style="width: 40%;"></p>
+    </div>
+
+    <br>
+    
+    
+    <div style="width: 50%; color: rgb(249, 249, 249);">
+        <h3>Key Sections: MD&A and Financial Statements</h2><br>
+
+    <p>
+        I have chosen to focus on <strong>Item 7 (Management's Discussion and Analysis - MD&A)</strong> and 
+        <strong>Item 8 (Financial Statements and Supplementary Data)</strong> because these sections contain 
+        the most critical information about a company's financial health, business strategy, and risks.
+    </p>
+    <br>
+    <H4>Few Important Insights to Check</H4>
+    <br>
+    <p>
+        <strong> 1. Net Income</strong><br>
+        Why Important: Net income is the final figure on the income statement, showing a company's profit after all expenses, including taxes and interest. It's a key indicator of a company's profitability and financial success.
+    </p>
+    <br>
+    <p>
+        <strong> 2. Operating Cash Flow</strong><br>
+        
+        Why Important: Operating cash flow shows the cash generated from the company's core business operations. It is a key measure of the company's ability to maintain day-to-day operations and invest in growth without relying on external funding.
+    </p>
+    <br>
+    <p>
+        <strong>  3. Debt-to-Equity Ratio</strong><br>
+       
+        Why Important: This ratio, calculated by dividing total liabilities by total shareholders' equity, indicates the company's financial leverage. It reflects the proportion of funding coming from debt compared to equity.
+        
+    </p>
+    <br>
+
+
+
+   
+    
+
+    
+    
+    </div>
+
+    <script>
+        function submitQuery() {
+            var query = document.getElementById("query").value;
+            
+            var xhr = new XMLHttpRequest();
+            var url = "/query";
+            var params = "query=" + query;
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.response) {
+                        document.getElementById("responseText").innerText = response.response;
+                        document.getElementById("response").style.display = "block";
+                    }
+                }
+            };
+            xhr.send(params);
+        }
+
+        document.getElementById("downloadBtn").addEventListener("click", function(event) {
+            event.preventDefault();
+            var xhr = new XMLHttpRequest();
+            var url = "/download";
+            var ticker = document.getElementById("ticker").value;
+            var limit = document.getElementById("limit").value;
+            var params = "ticker=" + ticker + "&limit=" + limit;
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        document.getElementById("downloadMsg").style.display = "block";
+                    }
+                }
+            };
+            xhr.send(params);
+        });
+    </script>
+</body>
+</html>

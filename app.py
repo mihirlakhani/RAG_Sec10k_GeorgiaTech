@@ -11,7 +11,7 @@ Settings.embed_model = HuggingFaceEmbedding(
     model_name="BAAI/bge-small-en-v1.5",
     device="cpu"
 )
-Settings.llm = PaLM(api_key="your_api_key")
+Settings.llm = PaLM(api_key="your_api_key_here")
 
 # Load documents and create the index for LLAMA
 documents_llama = SimpleDirectoryReader(r"C:/Users/DELL/Desktop/sec10k-RAG_Pipeline-master/data").load_data()
